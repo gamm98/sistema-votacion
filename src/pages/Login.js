@@ -19,9 +19,13 @@ export default function Login() {
   const navigate = useNavigate();
   const webcamRef = useRef(null);
 
+  //Validación del DNI
   const captureAndSend = async () => {
     if (!dni) {
       setMessage("Debe ingresar su DNI antes de validar.");
+      if (dni.length !== 8) {
+        alert("El DNI debe tener 8 dígitos.");
+      }
       return;
     }
 
@@ -41,12 +45,14 @@ export default function Login() {
     formData.append("imagen", file);
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/api/login", formData, {
+      const response = await axios.post("https://127.0.0.1:5000/api/login", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       if (response.data.success) {
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("dni", dni);//guarda el dni 
+        localStorage.setItem("nombre", response.data.nombre);
         setMessage("Validación facial correcta. Redirigiendo...");
         setTimeout(() => navigate("/voting"), 1500);
       } else {
@@ -57,6 +63,9 @@ export default function Login() {
     }
   };
 
+  
+
+
   return (
     <Box
       sx={{
@@ -64,11 +73,26 @@ export default function Login() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundImage: "url('/fondovotacion.jpg')",
+        backgroundImage: `url(${process.env.PUBLIC_URL + "/images/fondovotacion.jpg"})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
+    <Button
+    variant="outlined"
+    color="warning"
+    onClick={() => navigate("/admin")}
+    sx={{
+    position: "absolute",
+    top: 20,
+    right: 20,
+    backgroundColor: "rgba(255,255,255,0.85)",
+    fontWeight: "bold",
+    }}
+>
+    Ingresar como Admin
+</Button>
+
       <Paper
         sx={{
           p: { xs: 3, sm: 4 },
@@ -79,6 +103,18 @@ export default function Login() {
           boxShadow: 6,
         }}
       >
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+  <img
+    src={process.env.PUBLIC_URL + "/votewise.png"}
+    alt="Logo VoteWise"
+    style={{ width: "100px", height: "auto" }}
+  />
+</Box>
+
+<Typography variant="h5" fontWeight="bold" color="#1E3A8A" gutterBottom>
+  🗳️ Sistema de Votación VoteWise
+</Typography>
+
         <Avatar
           sx={{
             bgcolor: "#1E3A8A",
